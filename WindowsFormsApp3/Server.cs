@@ -6,10 +6,12 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net;
 using System.Net.Sockets;
+using System.Diagnostics;
 
 namespace WindowsFormsApp3
 {
@@ -23,13 +25,21 @@ namespace WindowsFormsApp3
         private void Server_Load(object sender, EventArgs e)
         {
             IPEndPoint iEP = new IPEndPoint(IPAddress.Any, 39999);
+            Task.Run(() => AcceptClient(iEP));
+        }
+
+        public void AcceptClient(IPEndPoint iEP)
+        {
             TcpListener Listner = new TcpListener(iEP);
             TcpClient CL = new TcpClient();
             NetworkStream NS;
             Encoding Enc = Encoding.ASCII;
+
+
             int ResSize = 0;
             string Resmsg, AnsMsg;
             byte[] ResByte = new byte[256];
+            byte[] Ansbyte = new byte[256];
 
             MemoryStream MS = new MemoryStream();
 
@@ -44,16 +54,18 @@ namespace WindowsFormsApp3
                     MS.Write(ResByte, 0, ResSize);
                 } while (ResSize > 0 && ResByte[255] != '\0');
 
-                Resmsg = Enc.GetString(MS.GetBuffer(), 0, (int)MS.Length).TrimEnd('\0');
+                Resmsg = Enc.GetString(ResByte, 0, ResSize).TrimEnd('\0');
 
                 Array.Clear(ResByte, 0, 256);
 
-                //AnsMsg = Resmsg.I
-            }
-        }
+                string num = Regex.Replace(Resmsg, @"[^0-9]", "");
+                AnsMsg = $"サーバーからクライアント{num}に応答";
+                Ansbyte = Encoding.UTF8.GetBytes(AnsMsg);
+                NS.Write(Ansbyte, 0, Ansbyte.Length);
 
-        public void AcceptClient(object sender,EventArgs e)
-        {
+                Array.Clear(Ansbyte, 0, Ansbyte.Length);
+                Debug.WriteLine($"Server->Client{num} fin");
+            }
 
         }
     }
