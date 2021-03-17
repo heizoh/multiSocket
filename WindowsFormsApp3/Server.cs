@@ -26,6 +26,7 @@ namespace WindowsFormsApp3
             TcpListener Listner = new TcpListener(iEP);
             TcpClient CL = new TcpClient();
             NetworkStream NS;
+            Encoding Enc = Encoding.ASCII;
             int ResSize = 0;
             string Resmsg, AnsMsg;
             byte[] ResByte = new byte[256];
@@ -43,6 +44,11 @@ namespace WindowsFormsApp3
                     MS.Write(ResByte, 0, ResSize);
                 } while (ResSize > 0 && ResByte[255] != '\0');
 
+                Resmsg = Enc.GetString(MS.GetBuffer(), 0, (int)MS.Length).TrimEnd('\0');
+
+                Array.Clear(ResByte, 0, 256);
+
+                //AnsMsg = Resmsg.I
             }
         }
 
