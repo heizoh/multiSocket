@@ -45,14 +45,18 @@ namespace WindowsFormsApp3
                  CL[h].Connect(EP.Address,EP.Port);
                  using(var stream = CL[h].GetStream())
                  {
-                     string msg = $"クライアント{h:00}からサーバーへメッセージ送信";
-                     byte[] sendByte = Encoding.UTF8.GetBytes(msg);
-                     stream.Write(sendByte, 0, sendByte.Length);
-                     sb.AppendLine($"C{h:00}送信：{msg}");
-                     byte[] retByte = new byte[256];
-                     stream.Read(retByte, 0, 256);
-                     string ret = Encoding.UTF8.GetString(retByte, 0,retByte.Length).TrimEnd('\0');
-                     sb.AppendLine($"C{h:00}受信：{ret}");
+                     for (int i = 0; i < 2; i++)
+                     {
+                         string msg = $"クライアント{h:00}からサーバーへメッセージ送信 {i+1}回目";
+                         byte[] sendByte = Encoding.UTF8.GetBytes(msg);
+                         stream.Write(sendByte, 0, sendByte.Length);
+                         sb.AppendLine($"C{h:00}送信：{msg}");
+                         byte[] retByte = new byte[256];
+                         stream.Read(retByte, 0, 256);
+                         string ret = Encoding.UTF8.GetString(retByte, 0, retByte.Length).TrimEnd('\0');
+                         sb.AppendLine($"C{h:00}受信：{ret}");
+
+                     }
                  }
                  Debug.WriteLine($"{h:00} -> Fin?");
 

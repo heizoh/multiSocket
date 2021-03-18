@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using System.Net;
 using System.Net.Sockets;
 using System.Diagnostics;
+using System.Threading;
 
 namespace WindowsFormsApp3
 {
@@ -35,6 +36,7 @@ namespace WindowsFormsApp3
             NetworkStream NS;
             Encoding Enc = Encoding.ASCII;
 
+            SynchronizationContext _sync = SynchronizationContext.Current;
 
             int ResSize = 0;
             string Resmsg, AnsMsg;
@@ -62,11 +64,16 @@ namespace WindowsFormsApp3
                 AnsMsg = $"サーバーからクライアント{num}に応答";
                 Ansbyte = Encoding.UTF8.GetBytes(AnsMsg);
                 NS.Write(Ansbyte, 0, Ansbyte.Length);
-
                 Array.Clear(Ansbyte, 0, Ansbyte.Length);
                 Debug.WriteLine($"Server->Client{num} fin");
+                heavymethod();
             }
 
+        }
+
+        private void heavymethod()
+        {
+            Thread.Sleep(10000);
         }
     }
 }
