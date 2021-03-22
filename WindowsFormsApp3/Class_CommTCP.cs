@@ -8,7 +8,7 @@ using System.Net;
 using System.Windows.Forms;
 using System.Net.Sockets;
 
-
+    
 namespace WindowsFormsApp3
 {
     class Class_CommTCP
@@ -50,6 +50,7 @@ namespace WindowsFormsApp3
             state.workSocket = handler;
             handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
         }
+
         void ReadCallback(IAsyncResult ar)
         {
             Console.WriteLine("ReadCallback ThreadID:" + Thread.CurrentThread.ManagedThreadId);
@@ -85,6 +86,12 @@ namespace WindowsFormsApp3
             Console.WriteLine("disConnect ThreadID:" + Thread.CurrentThread.ManagedThreadId);
             soc.Close();
         }
+
+        public void send(Socket handler, string msg)
+        {
+
+        }
+
         public class StateObject
         {
             // Client socket.  
