@@ -11,6 +11,8 @@ using System.Net.Sockets;
     
 namespace WindowsFormsApp3
 {
+    delegate void SendDelegate(Socket _soc);
+
     class Class_CommTCP
     {
         private ManualResetEvent SocketEvent = new ManualResetEvent(false);
@@ -18,12 +20,14 @@ namespace WindowsFormsApp3
         private Socket soc;
         private Form FM;
         private TextBox tb;
+        private Encoding ENC;
 
         public Class_CommTCP(IPEndPoint iep,Encoding enc,Form _FM, TextBox _tb)
         {
             FM = _FM;
             tb = _tb;
             IPE = iep;
+            ENC = enc;
             soc = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             soc.Bind(IPE);
             soc.Listen(10);
@@ -70,11 +74,12 @@ namespace WindowsFormsApp3
             handler.BeginSend(bb, 0, bb.Length, 0, new AsyncCallback(WriteCallback), state);
         }
 
-        void WriteCallback(IAsyncResult ar)
+        void  WriteCallback(IAsyncResult ar)
         {
             Console.WriteLine("WriteCallback ThreadID:" + Thread.CurrentThread.ManagedThreadId);
             StateObject state = (StateObject)ar.AsyncState;
             Socket handler = state.workSocket;
+
             handler.EndSend(ar);
 
             Console.WriteLine("送信完了");
@@ -89,6 +94,7 @@ namespace WindowsFormsApp3
 
         public void send(Socket handler, string msg)
         {
+            byte[] sd = ENC.GetBytes(msg);
 
         }
 
