@@ -40,7 +40,7 @@ namespace WindowsFormsApp3
 			int tnum = oea.tNum;
 			int num = oea.Num;
 			heavymethod();
-			CC_TCP.send(oea.SOC, "test");
+			CC_TCP.send(oea.SOC, $"test{num:00}->{tnum:00}");
 			textBox1.AppendText($"[Send{num:00}] test-{tnum:00}\r\n");
         }
 		
