@@ -55,15 +55,15 @@ namespace WindowsFormsApp3
 					for (int i = 0; i < 2; i++)
                     {
 
-                        string msg = $"クライアント{h:00}からサーバーへメッセージ送信 {i + 1}回目";
+                        string msg = $"From Client{h:00} to Server Message Sending... {i + 1}times...";
                         byte[] sendByte = Encoding.UTF8.GetBytes(msg);
                         streams[h].Write(sendByte, 0, sendByte.Length);
-                        this.Invoke((MethodInvoker)(() => textBox1.AppendText($"C{d:00}送信：{msg}\r\n")));
+                        this.Invoke((MethodInvoker)(() => textBox1.AppendText($"C{d:00}Send:{msg}\r\n")));
 
                         byte[] retByte = new byte[256];
                         _ = streams[h].Read(retByte, 0, 256);
                         string ret = Encoding.UTF8.GetString(retByte, 0, retByte.Length).TrimEnd('\0');
-                        this.Invoke((MethodInvoker)(() => textBox1.AppendText($"C{d:00}受信：{ret}\r\n")));
+                        this.Invoke((MethodInvoker)(() => textBox1.AppendText($"C{d:00}Recieve:{ret}\r\n")));
 
 						//Array.Clear(retByte, 0, retByte.Length);
 						//textBox1.Refresh();
