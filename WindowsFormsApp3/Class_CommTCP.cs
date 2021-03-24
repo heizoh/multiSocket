@@ -7,15 +7,17 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Windows.Forms;
 using System.Net.Sockets;
-
+using System.Diagnostics;
     
 namespace WindowsFormsApp3
 {
-    delegate void SendDelegate(Socket _soc);
 
-    class Class_CommTCP
+    public class Class_CommTCP
     {
-        private ManualResetEvent SocketEvent = new ManualResetEvent(false);
+		public delegate void SendDelegate(object o, OnEventArgs oea);
+		public event SendDelegate SD_Send;
+
+		private ManualResetEvent SocketEvent = new ManualResetEvent(false);
         private readonly IPEndPoint IPE;
         private Socket soc;
         private Form FM;
@@ -28,9 +30,11 @@ namespace WindowsFormsApp3
             tb = _tb;
             IPE = iep;
             ENC = enc;
+			SendDelegate SD_Send = delegate (object o,OnEventArgs oea) { };
             soc = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+			soc.ReceiveTimeout = 3600000;
             soc.Bind(IPE);
-            soc.Listen(10);
+            soc.Listen(50);
             var tM = new Thread(new ThreadStart(Round));
             tM.Start();
         }
@@ -69,6 +73,7 @@ namespace WindowsFormsApp3
             byte[] bb = new byte[ReadSize];
             Array.Copy(state.buffer, bb, ReadSize);
             string msg = System.Text.Encoding.UTF8.GetString(bb);
+			state.sb = msg;
             FM.Invoke((MethodInvoker)(() => tb.AppendText(msg + "\r\n")));
             Console.WriteLine(msg);
             handler.BeginSend(bb, 0, bb.Length, 0, new AsyncCallback(WriteCallback), state);
@@ -78,12 +83,19 @@ namespace WindowsFormsApp3
         {
             Console.WriteLine("WriteCallback ThreadID:" + Thread.CurrentThread.ManagedThreadId);
             StateObject state = (StateObject)ar.AsyncState;
-            Socket handler = state.workSocket;
+			OnEventArgs OEA = new OnEventArgs(state.workSocket);
 
-            handler.EndSend(ar);
+			string msg = state.sb;
+			Int32.TryParse(msg.Substring(6, 2), out int tnum);
+			Int32.TryParse(msg.Substring(23, 1), out int num);
+			OEA.tNum = tnum;
+			OEA.Num = num;
 
-            Console.WriteLine("送信完了");
-            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
+			FM.Invoke(SD_Send, new object[] { this, OEA });
+			send(state.workSocket, msg);
+
+			Console.WriteLine("送信完了");
+            OEA.SOC.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
         }
 
         void disConnect()
@@ -95,7 +107,8 @@ namespace WindowsFormsApp3
         public void send(Socket handler, string msg)
         {
             byte[] sd = ENC.GetBytes(msg);
-
+			NetworkStream NS = new NetworkStream(handler);
+			NS.Write(sd, 0, sd.Length);
         }
 
         public class StateObject
@@ -106,8 +119,24 @@ namespace WindowsFormsApp3
             public const int BufferSize = 256;
             // Receive buffer.  
             public byte[] buffer = new byte[BufferSize];
-            // Received data string.  
-            public StringBuilder sb = new StringBuilder();
+			// Received data string.  
+			public string sb = "";
         }
     }
+
+	public class OnEventArgs : EventArgs
+	{
+		//クライアントのNo.
+		public int tNum;
+		//何回目の返信か？
+		public int Num;
+		//実際に利用するソケット
+		public Socket SOC;
+
+		public OnEventArgs(Socket _soc)
+		{
+			this.SOC = _soc;
+		}
+	}
+
 }

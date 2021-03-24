@@ -22,26 +22,32 @@ namespace WindowsFormsApp3
 		{
 			InitializeComponent();
 		}
-
+		private Class_CommTCP CC_TCP;
 		private void Server_Load(object sender, EventArgs e)
 		{
 			Form fm = new Form();
 			TextBox tb = textBox1;
 			fm = this;
 			IPEndPoint iEP = new IPEndPoint(IPAddress.Any, 39999);
-			Class_CommTCP CC_TCP = new Class_CommTCP(iEP, Encoding.UTF8, fm, tb);
+			CC_TCP = new Class_CommTCP(iEP, Encoding.UTF8, fm, tb);
+			CC_TCP.SD_Send += signing;
 		}
 
-		private void signing(Socket soc)
-        {
-			heavymethod();
 
+
+		private void signing(object o, OnEventArgs oea)
+        {
+			int tnum = oea.tNum;
+			int num = oea.Num;
+			heavymethod();
+			CC_TCP.send(oea.SOC, "test");
+			textBox1.AppendText($"【送信 {num:00}】test-{tnum:00}\r\n");
         }
 		
 
 		private void heavymethod()
 		{
-			Thread.Sleep(5000);
+			Thread.Sleep(500);
 			Debug.WriteLine("処理終了");
 		}
 	}

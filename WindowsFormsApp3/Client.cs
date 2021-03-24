@@ -38,41 +38,46 @@ namespace WindowsFormsApp3
             for (int i = 0; i < n; i++)
             {
                 CL[i] = new TcpClient();
+				CL[i].ReceiveTimeout = 600000;
             }
             try
             {
-
+				NetworkStream[] streams = new NetworkStream[n];
                 Parallel.For(0, n, h =>
                 {
                     Debug.WriteLine($"{h:00} -> Start!");
                     CL[h].Connect(EP.Address, EP.Port);
                     int d = Thread.CurrentThread.ManagedThreadId;
 
-                    using (var stream = CL[h].GetStream())
+					streams[h] = CL[h].GetStream();
+
+					Task[] tasks = new Task[2];
+					for (int i = 0; i < 2; i++)
                     {
-                        for (int i = 0; i < 2; i++)
-                        {
 
-                            string msg = $"クライアント{h:00}からサーバーへメッセージ送信 {i + 1}回目";
-                            byte[] sendByte = Encoding.UTF8.GetBytes(msg);
-                            stream.Write(sendByte, 0, sendByte.Length);
-                            this.Invoke((MethodInvoker)(() => textBox1.AppendText($"C{d:00}送信：{msg}\r\n")));
+                        string msg = $"クライアント{h:00}からサーバーへメッセージ送信 {i + 1}回目";
+                        byte[] sendByte = Encoding.UTF8.GetBytes(msg);
+                        streams[h].Write(sendByte, 0, sendByte.Length);
+                        this.Invoke((MethodInvoker)(() => textBox1.AppendText($"C{d:00}送信：{msg}\r\n")));
 
-                            byte[] retByte = new byte[256];
-                            _ = stream.Read(retByte, 0, 256);
-                            string ret = Encoding.UTF8.GetString(retByte, 0, retByte.Length).TrimEnd('\0');
-                            this.Invoke((MethodInvoker)(() => textBox1.AppendText($"C{d:00}受信：{ret}\r\n")));
+                        byte[] retByte = new byte[256];
+                        _ = streams[h].Read(retByte, 0, 256);
+                        string ret = Encoding.UTF8.GetString(retByte, 0, retByte.Length).TrimEnd('\0');
+                        this.Invoke((MethodInvoker)(() => textBox1.AppendText($"C{d:00}受信：{ret}\r\n")));
 
-                            //Array.Clear(retByte, 0, retByte.Length);
-                            //textBox1.Refresh();
-
-                        }
+						//Array.Clear(retByte, 0, retByte.Length);
+						//textBox1.Refresh();
+						tasks[i] =Task.Run(() =>
+						{
+							Thread.Sleep(1000);
+						});
                     }
-                    Debug.WriteLine($"{h:00} -> Fin?");
+					Task.WaitAll(tasks);
+					Debug.WriteLine($"{h:00} -> Fin?");
 
-                });
+				});
 
-            }
+			}
             catch (AggregateException ae)
             {
                 var ex_l = ae.Flatten().InnerExceptions;
@@ -82,9 +87,10 @@ namespace WindowsFormsApp3
                     Debug.WriteLine(ex.GetType());
                 }
             }
-            //textBox1.Text = sb.ToString();
-            //this.Refresh();
+			finally
+			{
 
+			}
         }
     }
 }
