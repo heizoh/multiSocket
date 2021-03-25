@@ -22,10 +22,11 @@ namespace WindowsFormsApp3
         }
 
         private readonly int _port = 39999;
+        private ClientTCP CLtcp;
 
         private void Client_Load(object sender, EventArgs e)
         {
-
+            CLtcp = new ClientTCP();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -91,6 +92,11 @@ namespace WindowsFormsApp3
 			{
 
 			}
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            CLtcp.StartClient();
         }
     }
 }

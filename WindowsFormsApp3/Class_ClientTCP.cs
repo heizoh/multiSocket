@@ -12,7 +12,7 @@ namespace WindowsFormsApp3
 	class ClientTCP
 	{
 		// The port number for the remote device.  
-		private const int port = 11000;
+		private const int port = 39999;
 
 		// ManualResetEvent instances signal completion.  
 		private static ManualResetEvent connectDone =
@@ -25,7 +25,7 @@ namespace WindowsFormsApp3
 		// The response from the remote device.  
 		private static String response = String.Empty;
 
-		private static void StartClient()
+		public void StartClient()
 		{
 			// Connect to a remote device.  
 			try
@@ -33,8 +33,7 @@ namespace WindowsFormsApp3
 				// Establish the remote endpoint for the socket.  
 				// The name of the
 				// remote device is "host.contoso.com".  
-				IPHostEntry ipHostInfo = Dns.GetHostEntry("host.contoso.com");
-				IPAddress ipAddress = ipHostInfo.AddressList[0];
+				IPAddress ipAddress = IPAddress.Loopback;
 				IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
 
 				// Create a TCP/IP socket.  
