@@ -86,8 +86,8 @@ namespace WindowsFormsApp3
 			OnEventArgs OEA = new OnEventArgs(state.workSocket);
 
 			string msg = state.sb;
-			Int32.TryParse(msg.Substring(6, 2), out int tnum);
-			Int32.TryParse(msg.Substring(23, 1), out int num);
+			Int32.TryParse(msg.Substring(11, 2), out int tnum);
+			Int32.TryParse(msg.Substring(43, 1), out int num);
 			OEA.tNum = tnum;
 			OEA.Num = num;
 
