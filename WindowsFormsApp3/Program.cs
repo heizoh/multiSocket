@@ -16,13 +16,14 @@ namespace WindowsFormsApp3
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            var Task = Task<int>.Run(()=>
+            //Task task = new Task[2];
+            var task = Task.Run(()=>
             {
                 Application.Run(new Client());
             });
-            
+
             Application.Run(new Server());
-            Task.Wait();
+
         }
     }
 }

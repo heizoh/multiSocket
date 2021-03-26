@@ -12,59 +12,43 @@ using System.Windows.Forms;
 using System.Net;
 using System.Net.Sockets;
 using System.Diagnostics;
+using System.Threading;
 
 namespace WindowsFormsApp3
 {
-    public partial class Server : Form
-    {
-        public Server()
+	public partial class Server : Form
+	{
+		public Server()
+		{
+			InitializeComponent();
+		}
+		private Class_CommTCP CC_TCP;
+		private void Server_Load(object sender, EventArgs e)
+		{
+			Form fm = new Form();
+			TextBox tb = textBox1;
+			fm = this;
+			IPEndPoint iEP = new IPEndPoint(IPAddress.Any, 39999);
+			CC_TCP = new Class_CommTCP(iEP, Encoding.UTF8, fm, tb);
+			CC_TCP.SD_Send += signing;
+		}
+
+
+
+		private void signing(object o, OnEventArgs oea)
         {
-            InitializeComponent();
+			int tnum = oea.tNum;
+			int num = oea.Num;
+			heavymethod();
+			CC_TCP.send(oea.SOC, $"test{num:00}->{tnum:00}");
+			textBox1.AppendText($"[Send{num:00}] test-{tnum:00}\r\n");
         }
+		
 
-        private void Server_Load(object sender, EventArgs e)
-        {
-            IPEndPoint iEP = new IPEndPoint(IPAddress.Any, 39999);
-            Task.Run(() => AcceptClient(iEP));
-        }
-
-        async void AcceptClient(IPEndPoint iEP)
-        {
-            TcpListener Listner = new TcpListener(iEP);
-            TcpClient CL = new TcpClient();
-            NetworkStream NS;
-            Encoding Enc = Encoding.ASCII;
-
-
-            int ResSize = 0;
-            string Resmsg, AnsMsg;
-            byte[] ResByte = new byte[256];
-            byte[] Ansbyte = new byte[256];
-
-            MemoryStream MS = new MemoryStream();
-
-            Listner.Start(10);
-            while (true)
-            {
-                CL = Listner.AcceptTcpClient();
-                NS = CL.GetStream();
-                do
-                {
-                    ResSize = NS.Read(ResByte, 0, ResByte.Length);
-                    MS.Write(ResByte, 0, ResSize);
-                } while (ResSize > 0 && ResByte[255] != '\0');
-
-                Resmsg = Enc.GetString(ResByte, 0, ResSize).TrimEnd('\0');
-
-                Array.Clear(ResByte, 0, 256);
-                string num = Regex.Replace(Resmsg, @"[^0-9]", "");
-                AnsMsg = $"サーバーからクライアント{num}に応答";
-                Ansbyte = Encoding.UTF8.GetBytes(AnsMsg);
-                NS.Write(Ansbyte, 0, Ansbyte.Length);
-                await Task.Delay(1500);
-                Array.Clear(Ansbyte, 0, Ansbyte.Length);
-                Debug.WriteLine($"Server->Client{num} fin");
-            }
-        }
-    }
+		private void heavymethod()
+		{
+			Thread.Sleep(500);
+			Debug.WriteLine("処理終了");
+		}
+	}
 }
