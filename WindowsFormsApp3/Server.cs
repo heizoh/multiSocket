@@ -28,7 +28,7 @@ namespace WindowsFormsApp3
             Task.Run(() => AcceptClient(iEP));
         }
 
-        public void AcceptClient(IPEndPoint iEP)
+        async void AcceptClient(IPEndPoint iEP)
         {
             TcpListener Listner = new TcpListener(iEP);
             TcpClient CL = new TcpClient();
@@ -57,16 +57,14 @@ namespace WindowsFormsApp3
                 Resmsg = Enc.GetString(ResByte, 0, ResSize).TrimEnd('\0');
 
                 Array.Clear(ResByte, 0, 256);
-
                 string num = Regex.Replace(Resmsg, @"[^0-9]", "");
                 AnsMsg = $"サーバーからクライアント{num}に応答";
                 Ansbyte = Encoding.UTF8.GetBytes(AnsMsg);
                 NS.Write(Ansbyte, 0, Ansbyte.Length);
-
+                await Task.Delay(1500);
                 Array.Clear(Ansbyte, 0, Ansbyte.Length);
                 Debug.WriteLine($"Server->Client{num} fin");
             }
-
         }
     }
 }
